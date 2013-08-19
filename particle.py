@@ -13,22 +13,7 @@ class PVector:
 	def __init__ (self, x=0, y=0):
 		self.x=x
 		self.y=y
-	
-# 	def get_x(self):
-# 		return self.x
-# 		
-# 	def set_x(self, x):
-# 		self.x = x
-# 		
-# 	def set_y(self, y):
-# 		self.y = y
-# 		
-# 	def get_y(self):
-# 		return self.y
-# 	
-# 	x=property(get_x, set_x)
-# 	y=property(get_y, set_y)
-	
+		
 	def dump(self):
 		print self.x, self.y
 
@@ -69,48 +54,8 @@ class Particle:
 		self.jitter=jitter
 		self.density=density
 		
-# 	def get_position(self):
-# 		return self.position
-# 		
-# 	def get_velocity(self):
-# 		return self.velocity
-# 	
-# 	def get_acceleration(self):
-# 		return self.acceleration
-# 		
-# 	def set_position(self, position):
-# 		self.position=position
-# 		
-# 	def set_velocity(self, velocity):
-# 		self.velocity=velocity
-# 		
-# 	def set_acceleration(self, acceleration):
-# 		self.acceleration=acceleration
-# 	
-# 	def set_size(self, size):
-# 		self.size = float(size)
-# 		
-# 	def get_size(self):
-# 		return float(size)
-# 	
 	def get_age(self):
 		return self.life/float(self.lifespan)
-# 		
-# 	def set_age(self, age):
-# 		self.life = age*self.lifespan
-# 		
-# 	def get_color(self):
-# 		return self.color
-# 	
-# 	def set_color(self, color):
-# 		self.color=color
-# 		
-# 	position=property(get_position, set_position)
-# 	velocity=property(get_velocity, set_velocity)
-# 	acceleration=property(get_acceleration, set_acceleration)
-# 	size = property(get_size, set_size)
- 	age = property(get_age)
-# 	color = property(get_color, set_color)
 	
 	def accelerate(self, acc):
 		self.acceleration += acc

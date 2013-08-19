@@ -123,7 +123,7 @@ class Cannon(ParticleGenerator):
 		self.particles.add(Particle(self.position.x, self.position.y,
 			self.direction.x+(random.random()-0.5)*self.divergence,
 			self.direction.y+(random.random()-0.5)*self.divergence, 0, 0,
-			color=self.color, size=self.size*(0.3+.7*random.random()), jitter=0,
+			color=self.color, size=self.size*(0.3+.7*random.random()*self.divergence), jitter=0,
 			lifespan=self.lifespan*random.random()))
 
 
