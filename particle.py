@@ -42,7 +42,7 @@ class PVector:
 
 class Particle:
 	def __init__(self, x=0, y=0, x_vel=0, y_vel=0, x_accel=0, y_accel=0, color="black",
-		lifespan=100, size=8, jitter=0, density=1):
+		lifespan=100, size=8, jitter=0, density=1, fixed=FALSE, visible=TRUE):
 		self.position=PVector(x,y)
 		self.velocity=PVector(x_vel, y_vel)
 		self.max_velocity=10
@@ -51,8 +51,11 @@ class Particle:
 		self.lifespan=lifespan
 		self.life=lifespan
 		self.size=size
+		self.initial_size=size
 		self.jitter=jitter
 		self.density=density
+		self.fixed=fixed
+		self.visible=visible
 		
 	def get_age(self):
 		return self.life/float(self.lifespan)
@@ -61,12 +64,14 @@ class Particle:
 		self.acceleration += acc
 		
 	def plot(self, c, toric=FALSE, color="black"):
-		c.create_oval(self.position.x-self.size/2, self.position.y-self.size/2,
-			self.position.x+self.size/2, self.position.y+self.size/2,
-			outline=self.color, fill=self.color)
+		if self.visible==TRUE:
+			c.create_oval(self.position.x-self.size/2, self.position.y-self.size/2,
+				self.position.x+self.size/2, self.position.y+self.size/2,
+				outline=self.color, fill=self.color)
 			
 	def apply_force(self, force):
-		self.acceleration += force/self.size*self.density
+		if self.size!=0:
+			self.acceleration += force/self.size/self.density
 		
 	def dump(self):
 		print self.position.x, self.position.y
@@ -84,13 +89,15 @@ class Particle:
 			return FALSE
 
 	def update(self):
-		self.acceleration+=PVector((random.random()-.5)*self.jitter, (random.random()-.5)*self.jitter)
-		self.velocity += self.acceleration
-		if(self.velocity > self.max_velocity):
-			self.velocity = self.max_velocity
-		self.position = self.position + self.velocity
-		self.life -=1
-		self.acceleration=PVector(0,0)
+		if self.fixed!=TRUE:
+			#self.acceleration+=PVector((random.random()-.5)*self.jitter, (random.random()-.5)*self.jitter)
+			self.velocity += self.acceleration
+			if(self.velocity > self.max_velocity):
+				self.velocity = self.max_velocity
+			self.position = self.position + self.velocity
+			self.life -=1
+			self.acceleration=PVector(0,0)
+
 
 
 class Particles:
@@ -123,3 +130,44 @@ class Particles:
 				
 	def count(self):
 		return len(self.particle_list)
+		
+		
+		
+class Attractor(Particle):
+	def __init__(self, x=0, y=0, x_vel=0, y_vel=0, x_accel=0, y_accel=0, color="black",
+		lifespan=100, size=8, jitter=0, force=0):
+		self.position=PVector(x,y)
+		self.velocity=PVector(x_vel, y_vel)
+		self.max_velocity=10
+		self.acceleration=PVector(x_accel, y_accel)
+		self.color=color
+		self.lifespan=lifespan
+		self.life=lifespan
+		self.size=size
+		self.jitter=jitter
+		self.force=force
+		
+	def isDead(self):
+		return FALSE
+				
+	def apply(self, p):
+		dir=(self.position-p.position)
+		distance=abs(dir)
+		m=self.force*self.size*p.size/distance/distance
+		if(m>1):
+			m=1
+		p.apply_force(dir.normal()*m)
+		
+	def get_force(self, p):
+		dir=(self.position-p.position)
+		distance=abs(dir)
+		m=self.force*self.size*p.size/distance/distance
+		if(m>.1):
+			m=.1
+		return dir.normal()*m
+	
+	def plot(self, c, color="black"):
+		c.create_oval(self.position.x-self.size/2, self.position.y-self.size/2,
+			self.position.x+self.size/2, self.position.y+self.size/2,
+			outline=self.color)
+	

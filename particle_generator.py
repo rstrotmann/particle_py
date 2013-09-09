@@ -8,13 +8,13 @@ import random
 
 from particle import *
 
-screen_width = 600
-screen_height = 600
+# screen_width = 600
+# screen_height = 600
 gravity = 0.001
 
 class ParticleGenerator:
 	def __init__(self, x=0, y=0, dir_x=1, dir_y=1, acc_x=0, acc_y=0, divergence=.4, color="black", n=30,
-		size=10, lifespan=800, jitter=0):
+		size=10, lifespan=800, jitter=0, density=1, width=300, height=300):
 		self.position=PVector(x, y)
 		self.direction=PVector(dir_x, dir_y)
 		self.particles = Particles()
@@ -26,6 +26,9 @@ class ParticleGenerator:
 		self.acc_x=acc_x
 		self.acc_y=acc_y
 		self.jitter=jitter
+		self.density=density
+		self.screen_height=height
+		self.screen_width=width
 		self.spawn()	
 			
 	def spawn(self):
@@ -34,7 +37,7 @@ class ParticleGenerator:
 			self.direction.y * ((1-self.divergence/2) + random.random() * self.divergence),
 			y_accel=self.acc_y, x_accel=self.acc_x, color=self.color,
 			lifespan=self.lifespan * random.random(), size=self.size, jitter=self.jitter,
-			density=0))
+			density=self.density))
 	
 	def clear(self,c):
 		self.particles.clear(c)
@@ -47,19 +50,11 @@ class ParticleGenerator:
 		if(self.particles.count()<self.n):
 			self.spawn()
 
-# 	def get_particles(self):
-# 		return self.particles
-# 		
-# 	def set_particles(self, particles):
-# 		self.particles=particles
-# 		
-# 	particles=property(get_particles, set_particles)
-
 		
 
 
 class Flame(ParticleGenerator):
-	def __init__(self, x=0, y=0, dir_x=1, dir_y=1, acc_x=0, acc_y=.05, divergence=.4, color="black", n=30,
+	def __init__(self, x=0, y=0, dir_x=1, dir_y=1, acc_x=0, acc_y=-2, divergence=.4, color="black", n=30,
 		size=20, lifespan=80, jitter=0):
 		ParticleGenerator.__init__(self, x, y, dir_x, dir_y, acc_x, acc_y, divergence, color, n,
 		size, lifespan, jitter)
@@ -76,18 +71,18 @@ class Flame(ParticleGenerator):
 	def update(self):
 		ParticleGenerator.update(self)
 		for i in self.particles.particle_list:
-			i.size=(math.sqrt(i.age)*self.size)
-			if(self.density(i.position)!=0):
-				temp=1/float(self.density(i.position)) * self.particles.count()*100
-				#i.set_velocity(PVector(i.get_velocity().x, -.5*temp)) # perhaps use for color
-				i.color=(str('#%02x%02x%02x' % (200+50*(1-i.get_age()), 120+100*(1-i.age), 0+10*(1-i.age))))
-			heat=0
-			for j in self.particles.particle_list:
-				if(j.position.y < i.position.y):
-					heat += j.contains_x(i.position.x)
+			i.size=(math.sqrt(i.get_age())*self.size)
+			#if(self.density(i.position)!=0):
+			#	temp=1/float(self.density(i.position)) * self.particles.count()*100
+			#	#i.set_velocity(PVector(i.get_velocity().x, -.5*temp)) # perhaps use for color
+			i.color=(str('#%02x%02x%02x' % (200+50*(1-i.get_age()), 120+100*(1-i.get_age()), 0+10*(1-i.get_age()))))
+			#heat=0
+			#for j in self.particles.particle_list:
+			#	if(j.position.y < i.position.y):
+			#		heat += j.contains_x(i.position.x)
 			#i.set_velocity(PVector(i.get_velocity().x, -.1*heat)) 
 			#i.set_acceleration(PVector(i.get_acceleration().x, -.007*heat)) 
-			i.apply_force(PVector(i.acceleration.x, -.07*heat)) 
+			#i.apply_force(PVector(i.acceleration.x, -.07*heat)) 
 			#random accelerations
 			#i.accelerate(PVector((random.random()-.5)*self.jitter, (random.random()-.5)*self.jitter))
 			i.apply_force(PVector((random.random()-.5)*self.jitter, (random.random()-.5)*self.jitter))
@@ -123,7 +118,7 @@ class Cannon(ParticleGenerator):
 		self.particles.add(Particle(self.position.x, self.position.y,
 			self.direction.x+(random.random()-0.5)*self.divergence,
 			self.direction.y+(random.random()-0.5)*self.divergence, 0, 0,
-			color=self.color, size=self.size*(0.3+.7*random.random()*self.divergence), jitter=0,
+			color=self.color, size=self.size*(0.2+.8*random.random()), jitter=0,
 			lifespan=self.lifespan*random.random()))
 
 
@@ -157,17 +152,20 @@ class Rain(ParticleGenerator):
 
 class Sparkle(ParticleGenerator):
 	def spawn(self):
-		x=(random.random()-0.5)*self.divergence
-		y=random.random()-0.5
-		d=PVector(x,y)
-		d=d/float(abs(d))*random.random()*6
+# 		x=(random.random()-0.5)*self.divergence
+# 		y=random.random()-0.5
+# 		d=PVector(x,y)
+# 		d=d/float(abs(d))*random.random()*6
+# 		self.particles.add(Particle(self.position.x, self.position.y,
+# 			d.x, d.y, d.x/10, d.y/10, lifespan=self.lifespan*random.random(), color=self.color, size=self.size))
 		self.particles.add(Particle(self.position.x, self.position.y,
-			d.x, d.y, d.x/10, d.y/10, lifespan=self.lifespan*random.random(), color=self.color, size=self.size))
+			(random.random()-.5)*self.direction.x, (random.random()-.5)*self.direction.y,
+			lifespan=self.lifespan*random.random(), size=self.size))
 
 	def update(self):
 		ParticleGenerator.update(self)
 		for i in self.particles.particle_list:
-			i.set_size(math.sqrt(i.get_age())*self.size)
+			i.size =math.sqrt(i.get_age())*self.size
 	
 
 
@@ -179,4 +177,31 @@ class Fog(ParticleGenerator):
 		#self.particles.add(Particle(xx, yy, 0, 0, lifespan=self.lifespan*random.random(), color=self.color,
 		#	size=self.size*random.random()))	
 		#self.particles.add(Particle(p
-	
+
+
+class Bubbler(ParticleGenerator):
+	def spawn(self):
+		self.particles.add(Particle(100+(random.random()*(self.screen_width-200)), self.screen_height-10, 0, 0,
+			size=self.size*random.random(), density=1, color=self.color,
+			lifespan=random.random()*self.lifespan))
+			
+	def update(self):
+		ParticleGenerator.update(self)
+		for i in self.particles.particle_list:
+			i.apply_force(PVector((random.random()-0.5)*self.divergence, self.acc_y))
+			if i.position.y<=0:
+				i.life=0
+			i.size=i.initial_size*(0.6+0.4*1.5*(self.screen_height-i.position.y)/self.screen_height)
+			if i.size!=0:
+				i.density=1/i.size
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
